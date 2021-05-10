@@ -1,4 +1,4 @@
-package simpsanghatan.dbmsproject;
+package gui;
 
 import java.awt.EventQueue;
 
@@ -16,7 +16,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
-import static simpsanghatan.dbmsproject.maingui.getInstance;
+import static gui.maingui.getInstance;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
 
@@ -121,7 +121,7 @@ public class Feedback extends JPanel {
     btnCancel = new JButton("Cancel");
     btnCancel.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-        getInstance().replacePanel(new UserFront());
+        getInstance().replacePanel(UserFront.getInstance());
       }
     });
   }

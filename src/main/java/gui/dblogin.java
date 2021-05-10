@@ -1,10 +1,10 @@
- /*
+/*
  * 
  */
-package simpsanghatan.dbmsproject;
+package gui;
 
+import gui.LoginPage;
 import sqlhelper.Queries;
-import sqlhelper.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import utils.PasswordAuthentication;
+import gui.maingui;
 
 /**
  *
@@ -26,26 +28,33 @@ import javax.swing.border.Border;
  */
 public class dblogin extends JPanel {
 
+  private static dblogin instance;
+
   JButton login;
   JTextField userfield, passfield;
   JLabel userlabel, passlabel;
   private JFrame jFrame;
 
-  public dblogin() {
+  private dblogin() {
     Border border = BorderFactory.createTitledBorder("Database Login");
     setBorder(border);
     login = new JButton("Login");
     login.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        settings.user = userfield.getText();
-        settings.pass = passfield.getText();
-        boolean connect = Queries.connect();
-        if (!connect) {
-          JOptionPane.showMessageDialog(jFrame, "Unable to connect to database, please check your username and password",
-                  "Connection Error", JOptionPane.ERROR_MESSAGE);
+        String user = userfield.getText();
+        String pass = passfield.getText();
+        if (!PasswordAuthentication.isValid(pass)) {
+          JOptionPane.showMessageDialog(jFrame, "Invalid Password, make sure thier are no spaces in your password",
+                  "Invalid Password", JOptionPane.ERROR_MESSAGE);
         } else {
-          maingui.getInstance().replacePanel(new LoginPage());
+          boolean connect = Queries.connect(user, pass);
+          if (!connect) {
+            JOptionPane.showMessageDialog(jFrame, "Unable to connect to database, please check your username and password",
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
+          } else {
+            maingui.getInstance().replacePanel(new LoginPage());
+          }
         }
       }
     });
@@ -74,7 +83,10 @@ public class dblogin extends JPanel {
     this.add(login, gbc);
   }
 
-  public static void main(String[] args) {
-    maingui.getInstance().replacePanel(new dblogin());
+  public static dblogin getInstance() {
+    if (instance == null) {
+      instance = new dblogin();
+    }
+    return instance;
   }
 }

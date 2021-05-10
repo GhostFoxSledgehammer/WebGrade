@@ -1,4 +1,4 @@
-package simpsanghatan.dbmsproject;
+package gui;
 
 import java.awt.EventQueue;
 
@@ -109,7 +109,7 @@ public class ViewFeedback extends JPanel {
     btnBack = new JButton("Back");
     btnBack.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        //TODO
+        maingui.getInstance().replacePanel(AdminFront.getInstance());
       }
     });
   }

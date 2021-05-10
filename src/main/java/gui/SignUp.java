@@ -1,5 +1,6 @@
-package simpsanghatan.dbmsproject;
+package gui;
 
+import gui.LoginPage;
 import java.awt.EventQueue;
 
 import javax.swing.JPanel;
@@ -16,9 +17,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
+import sqlhelper.ConnectionLostError;
 import sqlhelper.Queries;
 import static sqlhelper.Queries.checkUser;
-import sqlhelper.settings;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
 
@@ -35,18 +36,6 @@ public class SignUp extends JPanel {
   private JButton btnCreate;
   private JButton btnCancel;
 
-  /**
-   * Launch the application.
-   */
-  public static void main(String[] args) {
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        settings.user = "root";
-        settings.pass = "stcdalex";
-        maingui.getInstance().replacePanel(new SignUp());
-      }
-    });
-  }
 
   /**
    * Create the frame.
@@ -137,10 +126,18 @@ public class SignUp extends JPanel {
         } else {
           if (!passwordField.getText().equals(repasswordField.getText())) {
             JOptionPane.showMessageDialog(null, "Passwords don't match");
-          } else if (checkUser(username, password) > 0) {
-            JOptionPane.showMessageDialog(null, "Username Already registered, try Loggin in or use another username");
-          } else {
-            Queries.createUser(username, password);
+          } else try {
+            if (checkUser(username, password) > 0) {
+              JOptionPane.showMessageDialog(null, "Username Already registered, try Loggin in or use another username");
+            } else {
+              boolean success = Queries.createUser(username, password);
+              if (success) {
+                JOptionPane.showMessageDialog(null, "User Account Created");
+                maingui.getInstance().replacePanel(UserFront.getInstance());
+              }
+            }
+          } catch (ConnectionLostError ex) {
+            maingui.getInstance().ConnectionLost();
           }
         }
       }

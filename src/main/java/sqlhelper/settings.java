@@ -8,9 +8,6 @@ package sqlhelper;
  * @author kshan
  */
 public class settings {
-
-  public static String user = "username";
-  public static String pass = "password";
   // JDBC driver name and database URL
   public static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
   public static String DB_URL = "jdbc:mysql://localhost/";

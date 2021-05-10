@@ -1,11 +1,11 @@
-package simpsanghatan.dbmsproject;
+package gui;
 
+import gui.AdminFront;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -16,10 +16,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
+import sqlhelper.ConnectionLostError;
 import sqlhelper.Queries;
 import sqlhelper.settings;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
+import utils.PasswordAuthentication;
 
 public class LoginPage extends JPanel {
 
@@ -89,24 +91,33 @@ public class LoginPage extends JPanel {
     btnGo = new JButton("Go");
     btnGo.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-        if (username.isEmpty() || password.isEmpty()) {
-          JOptionPane.showMessageDialog(null, "Username or password cannot be empty");
-          return;
-        }
-        int id = Queries.checkUser(usernameField.getText(), passwordField.getText());
-        if (id > 0) {
-          settings.userId = id;
-          //TODO
-          if (Queries.isAdmin(id)) {
-            maingui.getInstance().replacePanel(new AdminFront());
-          } else {
-            maingui.getInstance().replacePanel(new UserFront());
+        try {
+          String username = usernameField.getText();
+          String password = passwordField.getText();
+          if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Username or password cannot be empty");
+            return;
           }
-          //TODO
-        } else {
-          JOptionPane.showMessageDialog(null, "Unsuccessful login! \n Please try again");
+          if (!PasswordAuthentication.isValid(password)) {
+            JOptionPane.showMessageDialog(null,
+                    "Invalid Password, make sure thier are no spaces in your password");
+            return;
+          }
+          int id = Queries.checkUser(usernameField.getText(), passwordField.getText());
+          if (id > 0) {
+            settings.userId = id;
+            //TODO
+            if (Queries.isAdmin(id)) {
+              maingui.getInstance().replacePanel(AdminFront.getInstance());
+            } else {
+              maingui.getInstance().replacePanel(UserFront.getInstance());
+            }
+            //TODO
+          } else {
+            JOptionPane.showMessageDialog(null, "Unsuccessful login! \n Please try again");
+          }
+        } catch (ConnectionLostError ex) {
+          maingui.getInstance().ConnectionLost();
         }
       }
     });
@@ -135,8 +146,6 @@ public class LoginPage extends JPanel {
   }
 
   public static void main(String[] args) {
-    settings.user = "root";
-    settings.pass = "stcdalex";
     maingui.getInstance().replacePanel(new LoginPage());
   }
 }

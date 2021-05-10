@@ -1,10 +1,11 @@
 /*
  * 
  */
-package simpsanghatan.dbmsproject;
+package gui;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -35,14 +36,21 @@ public class maingui extends JFrame {
   public void replacePanel(JPanel newpanel) {
     if (!SwingUtilities.isEventDispatchThread()) {
       SwingUtilities.invokeLater(() -> replacePanel(newpanel));
+      return;
     }
     getInstance().getContentPane().removeAll();
     getInstance().getContentPane().add(newpanel);
     getInstance().setSize(1500, 1500);
     getInstance().pack();
+    getInstance().setLocationRelativeTo(null);
   }
 
   public static void main(String[] args) {
-    getInstance().replacePanel(new dblogin());
+    getInstance().replacePanel(dblogin.getInstance());
+  }
+
+  public void ConnectionLost() {
+    JOptionPane.showMessageDialog(this, "Connection lost, Please Login again!");
+    maingui.getInstance().replacePanel(dblogin.getInstance());
   }
 }
