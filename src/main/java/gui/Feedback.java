@@ -16,26 +16,15 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
-import static gui.maingui.getInstance;
+import sqlhelper.ConnectionLostError;
+import sqlhelper.Queries;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
+import utils.TextLimit;
 
 public class Feedback extends JPanel {
 
-  /**
-   * Launch the application.
-   */
-  public static void main(String[] args) {
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          getInstance().replacePanel(new Feedback());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-  }
+  private static Feedback instance;
   private JLabel lblanonymous;
   private JLabel lblHelpful;
   private JLabel logoLabel;
@@ -44,9 +33,24 @@ public class Feedback extends JPanel {
   private JButton btnCancel;
 
   /**
+   * Launch the application.
+//   */
+//  public static void main(String[] args) {
+//    EventQueue.invokeLater(new Runnable() {
+//      public void run() {
+//        try {
+//          maingui.getInstance().replacePanel(new Feedback());
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    });
+//  }
+
+  /**
    * Create the frame.
    */
-  public Feedback() {
+  private Feedback() {
     Border border = BorderFactory.createTitledBorder("Give Feedback");
     setBorder(border);
     setBackground(new Color(255, 255, 255));
@@ -86,6 +90,13 @@ public class Feedback extends JPanel {
     add(btnCancel, gbc);
   }
 
+  public static Feedback getInstance() {
+    if (instance == null) {
+      instance = new Feedback();
+    }
+    return instance;
+  }
+
   private void createLabels() {
     lblanonymous = new JLabel("Your feedback will remain anonymous ");
     lblanonymous.setForeground(new Color(139, 0, 0));
@@ -96,24 +107,36 @@ public class Feedback extends JPanel {
     lblHelpful.setForeground(new Color(139, 0, 0));
 
     logoLabel = new JLabel("");
-    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 100));
+    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 200));
     logoLabel.setBounds(143, 11, 147, 129);
   }
 
   private void createFields() {
     textArea = new JTextArea(10, 70);
     textArea.setBackground(Color.LIGHT_GRAY);
+    textArea.setDocument(new TextLimit(500));
   }
 
   private void createButtons() {
     btnSubmit = new JButton("Submit");
     btnSubmit.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (!textArea.getText().isEmpty()) {
-          //TODO
-          JOptionPane.showMessageDialog(null, "We received your feedback. \n Thank you");
-        } else {
+        String feedback = textArea.getText();
+        if (feedback.isEmpty()) {
           JOptionPane.showMessageDialog(null, "Please write something to submit :)");
+        } else {
+          boolean success;
+          try {
+            success = Queries.submitFeedback(feedback);
+            if (success) {
+              JOptionPane.showMessageDialog(null, "We received your feedback. \n Thank you");
+              maingui.getInstance().replacePanel(UserFront.getInstance());
+            } else {
+              JOptionPane.showMessageDialog(null, "There was a problem submiting the feedback.");
+            }
+          } catch (ConnectionLostError ex) {
+            maingui.getInstance().ConnectionLost();
+          }
         }
       }
     });
@@ -121,7 +144,7 @@ public class Feedback extends JPanel {
     btnCancel = new JButton("Cancel");
     btnCancel.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-        getInstance().replacePanel(UserFront.getInstance());
+        maingui.getInstance().replacePanel(UserFront.getInstance());
       }
     });
   }

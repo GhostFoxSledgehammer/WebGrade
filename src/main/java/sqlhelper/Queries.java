@@ -21,6 +21,7 @@ public class Queries {
 
   static Connection conn = null;
   static Statement stmt = null;
+
   public static boolean connect(String user, String pass) {
     try {
       Class.forName("com.mysql.jdbc.Driver");
@@ -58,7 +59,7 @@ public class Queries {
     String logintab = "CREATE TABLE IF NOT EXISTS login "
             + "(id INTEGER unsigned AUTO_INCREMENT, "
             + " password VARCHAR(70) NOT NULL, "
-            + " username VARCHAR(20) NOT NULL,"
+            + " username VARCHAR(20) NOT NULL UNIQUE,"
             + "isadmin BOOL NOT NULL,"
             + "PRIMARY KEY (id))";
     String websitetab = "CREATE TABLE IF NOT EXISTS website "
@@ -67,27 +68,18 @@ public class Queries {
             + "title VARCHAR(100),"
             + " hits INTEGER Default 0,"
             + "PRIMARY KEY (id))";
-    String keywordtab = "CREATE TABLE IF NOT EXISTS keyword"
-            + "(id INTEGER unsigned AUTO_INCREMENT,"
-            + "keyword VARCHAR(15) NOT NULL,"
-            + "PRIMARY KEY (id))";
-    String keyword_website_tab = "CREATE TABLE IF NOT EXISTS keyword_website ("
-            + "webid int unsigned not null,"
-            + "keyid int unsigned not null, "
-            + "CONSTRAINT keyword_website_keyword foreign key (webid) references website(id),"
-            + "CONSTRAINT keyword_website_website foreign key (keyid) references keyword(id), "
-            + "CONSTRAINT keyword_website_unique UNIQUE (webid, keyid))";
     String feedback_tab = "CREATE TABLE IF NOT EXISTS feedbacks("
             + "id BIGINT NOT NULL AUTO_INCREMENT,"
             + "feedback VARCHAR(500),"
+            + "seen BOOL DEFAULT 0,"
             + "PRIMARY KEY (id))";
     try {
       stmt.executeUpdate(logintab);
       stmt.executeUpdate(websitetab);
-      stmt.executeUpdate(keywordtab);
-      stmt.executeUpdate(keyword_website_tab);
       stmt.executeUpdate(feedback_tab);
-      Queries.createUser("admin", "admin", true);
+      if (checkUser("admin", "admin") == -1) {
+        Queries.createUser("admin", "admin", true);
+      }
       return true;
     } catch (SQLException ex) {
       Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
@@ -197,7 +189,7 @@ public class Queries {
     try {
       ResultSet rs = stmt.executeQuery(sql.toString());
       ArrayList<link> links = new ArrayList();
-      while(rs.next()) {
+      while (rs.next()) {
         links.add(new link(rs.getString(1), rs.getString(2)));
       }
       return links;
@@ -207,29 +199,115 @@ public class Queries {
     return null;
   }
 
-  public static void updateHits(String link) throws ConnectionLostError {
+  public static boolean updateHits(String link) throws ConnectionLostError {
     checkConnection();
     int id = checkLink(link);
     if (id == -1) {
       System.out.println("not found");
-      return;
+      return false;
     } else {
       try {
         String sql = "UPDATE website \n"
-                + "SET hits = hits + 1 \n" +
-                "WHERE id = " + id;
+                + "SET hits = hits + 1 \n"
+                + "WHERE id = " + id;
         stmt.executeUpdate(sql);
+        return true;
       } catch (SQLException ex) {
         Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
       }
     }
+    return false;
   }
-  
+
+  public static boolean submitFeedback(String feedback) throws ConnectionLostError {
+    checkConnection();
+    if (feedback.length() > 500) {
+      return false;
+    }
+    String sql = "INSERT INTO feedbacks(feedback)\n"
+            + "VALUES('" + feedback + "')";
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+
+  public static ArrayList<feedback> getFeedbacks() throws ConnectionLostError {
+    checkConnection();
+    String sql = "SELECT * FROM feedbacks";
+    try {
+      ResultSet rs = stmt.executeQuery(sql);
+      ArrayList<feedback> feedbacks = new ArrayList();
+      while (rs.next()) {
+        feedbacks.add(new feedback(rs.getInt(1), rs.getString(2), rs.getBoolean(3)));
+      }
+      return feedbacks;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return null;
+  }
+
+  public static boolean markAsRead(feedback feed) throws ConnectionLostError {
+    checkConnection();
+    String sql = "UPDATE feedbacks \n"
+            + "SET seen = 1 \n"
+            + "WHERE id = " + feed.id;
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+
+  public static boolean deleteFeedback(feedback feed) throws ConnectionLostError {
+    checkConnection();
+    String sql = "DELETE from feedbacks \n"
+            + "WHERE id = " + feed.id;
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+
   public static class link {
+
     public String url, title;
+
     public link(String title, String url) {
       this.url = url;
       this.title = title;
+    }
+  }
+
+  public static class feedback {
+
+    public int id;
+    public String feedback;
+    public boolean seen;
+
+    public feedback(String feed, boolean seen) {
+      this.feedback = feed;
+      this.seen = seen;
+    }
+
+    public feedback(int id, String feed, boolean seen) {
+      this.id = id;
+      this.feedback = feed;
+      this.seen = seen;
+    }
+
+    @Override
+    public String toString() {
+      return feedback;
     }
   }
 }

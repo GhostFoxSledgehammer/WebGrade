@@ -2,8 +2,6 @@ package gui;
 
 import crawler.Crawler;
 import crawler.CrawlerListener;
-import java.awt.EventQueue;
-
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -116,6 +114,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
     }
     return instance;
   }
+
   private void createLabels() {
     lblGiveTheUrl = new JLabel("Give the URL to start crawling from ");
     lblGiveTheUrl.setForeground(new Color(139, 0, 0));
@@ -145,7 +144,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
     btnViewFeedbacks = new JButton("View Feedbacks");
     btnViewFeedbacks.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-         maingui.getInstance().replacePanel(new ViewFeedback());
+        maingui.getInstance().replacePanel(ViewFeedback.getInstance());
       }
     });
 

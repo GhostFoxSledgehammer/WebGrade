@@ -1,7 +1,5 @@
 package gui;
 
-import java.awt.EventQueue;
-
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -156,7 +152,7 @@ public class UserFront extends JPanel {
     btnFeedback = new JButton("Give Feedback");
     btnFeedback.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        Feedback.main(null);
+        maingui.getInstance().replacePanel(Feedback.getInstance());
       }
     });
 

@@ -22,6 +22,7 @@ import sqlhelper.Queries;
 import static sqlhelper.Queries.checkUser;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
+import utils.PasswordAuthentication;
 
 public class SignUp extends JPanel {
 
@@ -35,7 +36,6 @@ public class SignUp extends JPanel {
   private JLabel lblRetypePassword;
   private JButton btnCreate;
   private JButton btnCancel;
-
 
   /**
    * Create the frame.
@@ -104,7 +104,7 @@ public class SignUp extends JPanel {
     lblRetypePassword.setFont(new Font("Agency FB", Font.PLAIN, 22));
 
     logoLabel = new JLabel("");
-    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 150));
+    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 200));
   }
 
   private void createFields() {
@@ -123,6 +123,9 @@ public class SignUp extends JPanel {
         String password = passwordField.getText();
         if (username.isEmpty() || password.isEmpty()) {
           JOptionPane.showMessageDialog(null, "Please enter the required details");
+        } else if (!PasswordAuthentication.isValid(password)) {
+          JOptionPane.showMessageDialog(null, "Invalid Password, make sure thier are no spaces in your password",
+                  "Invalid Password", JOptionPane.ERROR_MESSAGE);
         } else {
           if (!passwordField.getText().equals(repasswordField.getText())) {
             JOptionPane.showMessageDialog(null, "Passwords don't match");
@@ -134,6 +137,8 @@ public class SignUp extends JPanel {
               if (success) {
                 JOptionPane.showMessageDialog(null, "User Account Created");
                 maingui.getInstance().replacePanel(UserFront.getInstance());
+              } else {
+                JOptionPane.showMessageDialog(null, "Cannot Create Account, please try again");
               }
             }
           } catch (ConnectionLostError ex) {

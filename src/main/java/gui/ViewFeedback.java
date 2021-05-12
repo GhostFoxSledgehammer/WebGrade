@@ -3,70 +3,85 @@ package gui;
 import java.awt.EventQueue;
 
 import javax.swing.JPanel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.util.Vector;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import sqlhelper.ConnectionLostError;
+import sqlhelper.Queries;
+import sqlhelper.Queries.feedback;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
 
 public class ViewFeedback extends JPanel {
 
+  private static ViewFeedback instance;
+  private int feedcol;
   private JTable table;
   private JLabel lblFeedbacks;
   private JLabel logoLabel;
-  private JButton btnViewFeedbacks;
-  private JButton btnBack;
+  private JButton btnViewFeedbacks, btnBack, btnRead, btnMarkRead;
   private final JScrollPane scrollPane;
 
   /**
    * Launch the application.
    */
-  public static void main(String[] args) {
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          maingui.getInstance().replacePanel(new ViewFeedback());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-  }
+//  public static void main(String[] args) {
+//    EventQueue.invokeLater(new Runnable() {
+//      public void run() {
+//        try {
+//          maingui.getInstance().replacePanel(ViewFeedback.getInstance());
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    });
+//  }
+  private DefaultTableModel model;
+  private JButton btnDelete;
 
   /**
    * Create the frame.
    */
-  public ViewFeedback() {
+  private ViewFeedback() {
     Border border = BorderFactory.createTitledBorder("View Feedbacks");
     setBorder(border);
     setBackground(Color.WHITE);
     setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
+
     createLabels();
     createButtons();
-
-    table = new JTable();
-    table.setEnabled(false);
-    table.setRowSelectionAllowed(false);
+    createTables();
     scrollPane = new JScrollPane(table);
 
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.weightx = 1;
     gbc.weighty = 1;
-    gbc.gridwidth = 2;
+    gbc.gridwidth = 3;
     gbc.insets = new Insets(5, 5, 5, 5);
 
     add(logoLabel, gbc);
@@ -76,16 +91,27 @@ public class ViewFeedback extends JPanel {
     add(lblFeedbacks, gbc);
     gbc.gridx++;
     add(btnViewFeedbacks, gbc);
+    gbc.gridx++;
+    add(btnRead, gbc);
+    gbc.gridy++;
+    add(btnDelete, gbc);
 
-    gbc.gridwidth = 2;
-    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = 3;
     gbc.gridx = 0;
     gbc.gridy++;
+    gbc.fill = GridBagConstraints.BOTH;
     add(scrollPane, gbc);
-    gbc.fill =  GridBagConstraints.NONE;
+    gbc.fill = GridBagConstraints.NONE;
 
     gbc.gridy++;
     add(btnBack, gbc);
+  }
+
+  public static ViewFeedback getInstance() {
+    if (instance == null) {
+      instance = new ViewFeedback();
+    }
+    return instance;
   }
 
   private void createLabels() {
@@ -94,7 +120,7 @@ public class ViewFeedback extends JPanel {
     lblFeedbacks.setFont(new Font("Agency FB", Font.PLAIN, 25));
 
     logoLabel = new JLabel("");
-    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 150));
+    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 200));
   }
 
   private void createButtons() {
@@ -102,7 +128,10 @@ public class ViewFeedback extends JPanel {
     btnViewFeedbacks = new JButton("View Feedbacks");
     btnViewFeedbacks.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        //TODO
+        clearTable();
+        new Thread(() -> {
+          ViewFeedback.getFeedback();
+        }).start();
       }
     });
 
@@ -112,5 +141,149 @@ public class ViewFeedback extends JPanel {
         maingui.getInstance().replacePanel(AdminFront.getInstance());
       }
     });
+
+    btnRead = new JButton("Read");
+    btnRead.setEnabled(false);
+    btnRead.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        readFeedbacks();
+      }
+    });
+
+    btnDelete = new JButton("Delete");
+    btnDelete.setEnabled(false);
+    btnDelete.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        deleteFeedbacks();
+      }
+    });
+  }
+
+  private void createTables() {
+    model = new DefaultTableModel();
+    model.addColumn("S.no");
+    model.addColumn("Feedback");
+    feedcol = 1;
+    table = new JTable();
+    table.setModel(model);
+    table.setRowSelectionAllowed(true);
+    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    table.setDefaultEditor(Object.class, null);//Uneditable
+    table.getColumnModel().getColumn(0).setMinWidth(50);
+    table.getColumnModel().getColumn(0).setMaxWidth(70);
+    table.getTableHeader().setReorderingAllowed(false);
+    table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+        @Override
+        public void valueChanged(ListSelectionEvent event) {
+          if(table.getSelectionModel().isSelectionEmpty()) {
+            btnRead.setEnabled(false);
+            btnDelete.setEnabled(false);
+          } else {
+            btnRead.setEnabled(true);
+            btnDelete.setEnabled(true);
+          }
+        }
+    });
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+      @Override
+      public Component getTableCellRendererComponent(JTable table,
+              Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+        int column = table.getColumn("Feedback").getModelIndex();
+        feedback feed = (feedback) table.getModel().getValueAt(row, column);
+        if (feed.seen) {
+          setBackground(table.getBackground().darker());
+          setForeground(table.getForeground().darker());
+        } else {
+          setBackground(table.getBackground());
+          setForeground(table.getForeground());
+        }
+        return this;
+      }
+    });
+    table.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+          int row = table.getSelectedRow();
+          int col = model.findColumn("Feedback");
+          Object link = model.getValueAt(row, col);
+
+        }
+      }
+    });
+  }
+
+  private void clearTable() {
+
+    int rowCount = model.getRowCount();
+    for (int i = rowCount - 1; i >= 0; i--) {
+      model.removeRow(i);
+    }
+  }
+
+  private static void getFeedback() {
+    try {
+      ArrayList<feedback> feedbacks = Queries.getFeedbacks();
+      updateFeedbacks(feedbacks);
+    } catch (ConnectionLostError ex) {
+      maingui.getInstance().ConnectionLost();
+    }
+  }
+
+  private static void updateFeedbacks(ArrayList<Queries.feedback> feedbacks) {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      SwingUtilities.invokeLater(() -> updateFeedbacks(feedbacks));
+      return;
+    }
+    Iterator<feedback> it = feedbacks.iterator();
+    int i = 1;
+    while (it.hasNext()) {
+      feedback afeed = it.next();
+      getInstance().model.addRow(new Object[]{i, afeed});
+    }
+    getInstance().model.fireTableDataChanged();
+  }
+
+  private void readFeedbacks() {
+    int row = table.getSelectedRow();
+    feedback feed = (feedback) model.getValueAt(row, feedcol);
+    JTextArea jta = new JTextArea(feed.feedback);
+    String[] options = {"Marks as Read", "Close"};
+    int x = JOptionPane.showOptionDialog(maingui.getInstance(), jta,
+            "View Feedback", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+    if (x == 0) {
+      try {
+        boolean marked = Queries.markAsRead(feed);
+        if (marked) {
+          feed.seen = true;
+          model.fireTableRowsUpdated(row, row+1);
+        }
+      } catch (ConnectionLostError ex) {
+        maingui.getInstance().ConnectionLost();
+      }
+    }
+
+  }
+
+  private void deleteFeedbacks() {
+    int row = table.getSelectedRow();
+    feedback feed = (feedback) model.getValueAt(row, feedcol);
+    JTextArea jta = new JTextArea(feed.feedback);
+    String[] options = {"Yes", "No"};
+    int x = JOptionPane.showOptionDialog(maingui.getInstance(), "This is permanent, are you sure?",
+            "Delete Feedback", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+    if (x == 0) {
+      try {
+        boolean deleted = Queries.deleteFeedback(feed);
+        if (deleted) {
+          model.removeRow(row);
+          model.fireTableRowsDeleted(row, row +1);
+        }
+      } catch (ConnectionLostError ex) {
+        maingui.getInstance().ConnectionLost();
+      }
+    }
+
   }
 }

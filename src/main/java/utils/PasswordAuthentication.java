@@ -141,7 +141,7 @@ public final class PasswordAuthentication {
   }
 
   public static boolean isValid(String pass) {
-    if (pass.contains(" ")) {
+    if (pass.isEmpty() || pass.contains(" ")) {
       return false;
     }
     return true;

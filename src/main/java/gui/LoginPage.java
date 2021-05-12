@@ -129,7 +129,7 @@ public class LoginPage extends JPanel {
     lblLogin.setFont(new Font("Agency FB", Font.BOLD, 35));
 
     logoLabel = new JLabel("");
-    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 150));
+    logoLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("logo.png"), 200));
 
     lblUsername = new JLabel("Username");
     lblUsername.setForeground(new Color(139, 0, 0));
@@ -145,7 +145,7 @@ public class LoginPage extends JPanel {
     passwordField = new JPasswordField(10);
   }
 
-  public static void main(String[] args) {
-    maingui.getInstance().replacePanel(new LoginPage());
-  }
+//  public static void main(String[] args) {
+//    maingui.getInstance().replacePanel(new LoginPage());
+//  }
 }

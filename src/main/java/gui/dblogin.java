@@ -3,7 +3,6 @@
  */
 package gui;
 
-import gui.LoginPage;
 import sqlhelper.Queries;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,7 +19,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 import utils.PasswordAuthentication;
-import gui.maingui;
 
 /**
  *
@@ -44,7 +42,10 @@ public class dblogin extends JPanel {
       public void actionPerformed(ActionEvent e) {
         String user = userfield.getText();
         String pass = passfield.getText();
-        if (!PasswordAuthentication.isValid(pass)) {
+        if (user.isEmpty() || pass.isEmpty()) {
+          JOptionPane.showMessageDialog(jFrame, "Username and Password cannot be empty",
+                  "No Username/Password", JOptionPane.ERROR_MESSAGE);
+        } else if (!PasswordAuthentication.isValid(pass)) {
           JOptionPane.showMessageDialog(jFrame, "Invalid Password, make sure thier are no spaces in your password",
                   "Invalid Password", JOptionPane.ERROR_MESSAGE);
         } else {

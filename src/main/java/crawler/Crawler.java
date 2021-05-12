@@ -74,9 +74,9 @@ public class Crawler {
     thread.interrupt();
     links.clear();
   }
-  public static void main(String[] args) {
-    new Crawler().getPageLinks("http://www.mkyong.com/", 1);
-  }
+//  public static void main(String[] args) {
+//    new Crawler().getPageLinks("http://www.mkyong.com/", 1);
+//  }
 
   private void addLink(String URL, String title) {
     try {

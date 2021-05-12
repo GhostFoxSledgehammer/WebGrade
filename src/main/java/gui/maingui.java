@@ -4,10 +4,15 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import utils.MathUtils;
 
 /**
  *
@@ -19,7 +24,6 @@ public class maingui extends JFrame {
 
   private maingui() {
     setTitle("Website Ranking System");
-    setSize(1000, 1000);
     pack();
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -40,8 +44,12 @@ public class maingui extends JFrame {
     }
     getInstance().getContentPane().removeAll();
     getInstance().getContentPane().add(newpanel);
+    getInstance().setMinimumSize(new Dimension(100,100));
     getInstance().setSize(1500, 1500);
     getInstance().pack();
+//    double scaling = getScaling();
+//    Dimension size = MathUtils.scaleDimension(getInstance().getSize(), scaling);
+    getInstance().setMinimumSize(getInstance().getSize());
     getInstance().setLocationRelativeTo(null);
   }
 
@@ -52,5 +60,11 @@ public class maingui extends JFrame {
   public void ConnectionLost() {
     JOptionPane.showMessageDialog(this, "Connection lost, Please Login again!");
     maingui.getInstance().replacePanel(dblogin.getInstance());
+  }
+
+  private double getScaling() {
+    int sr = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
+    double x = (double) sr / 96;
+    return x;
   }
 }
