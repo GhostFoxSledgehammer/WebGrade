@@ -77,7 +77,7 @@ public class Queries {
       stmt.executeUpdate(logintab);
       stmt.executeUpdate(websitetab);
       stmt.executeUpdate(feedback_tab);
-      if (checkUser("admin", "admin") == -1) {
+      if (checkUser("admin") == -1) {
         Queries.createUser("admin", "admin", true);
       }
       return true;
@@ -87,10 +87,29 @@ public class Queries {
     return false;
   }
 
-  public static int checkUser(String username, String password) throws ConnectionLostError {
+  public static int loginUser(String username, String password) throws ConnectionLostError {
+    checkConnection();
+    String sql = "Select id,password from login WHERE username = '"
+            + username + "'";
+    try {
+      ResultSet rs = stmt.executeQuery(sql);
+      if (rs.next()) {
+        int id = rs.getInt(1);
+        String token = rs.getString(2);
+        if (settings.passwordAuth.authenticate(password.toCharArray(), token)) {
+          return id;
+        }
+      }
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return -1;
+  }
+
+  public static int checkUser(String username) throws ConnectionLostError {
     checkConnection();
     String sql = "Select id from login WHERE username = '"
-            + username + "' and password = '" + password + "'";
+            + username + "'";
     try {
       ResultSet rs = stmt.executeQuery(sql);
       if (rs.next()) {
@@ -104,6 +123,7 @@ public class Queries {
 
   public static boolean createUser(String username, String password) throws ConnectionLostError {
     checkConnection();
+    password = settings.passwordAuth.hash(password.toCharArray());
     String sql = "INSERT INTO login(username, password, isadmin) "
             + "VALUES ('" + username + "','" + password + "',0)";
     try {
@@ -117,6 +137,7 @@ public class Queries {
 
   public static void createUser(String username, String password, boolean isadmin) throws ConnectionLostError {
     checkConnection();
+    password = settings.passwordAuth.hash(password.toCharArray());
     String sql = "INSERT INTO login(username, password, isadmin) "
             + "VALUES ('" + username + "','" + password + "'," + (isadmin ? "1" : "0")
             + ")";

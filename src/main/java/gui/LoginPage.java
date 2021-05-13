@@ -103,7 +103,7 @@ public class LoginPage extends JPanel {
                     "Invalid Password, make sure thier are no spaces in your password");
             return;
           }
-          int id = Queries.checkUser(usernameField.getText(), passwordField.getText());
+          int id = Queries.loginUser(usernameField.getText(), passwordField.getText());
           if (id > 0) {
             settings.userId = id;
             //TODO
