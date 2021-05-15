@@ -5,6 +5,7 @@ package sqlhelper;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -64,7 +65,7 @@ public class Queries {
             + "PRIMARY KEY (id))";
     String websitetab = "CREATE TABLE IF NOT EXISTS website "
             + "(id INTEGER unsigned AUTO_INCREMENT, "
-            + " url VARCHAR(100) NOT NULL, "
+            + " url VARCHAR(200) NOT NULL, "
             + "title VARCHAR(100),"
             + " hits INTEGER Default 0,"
             + "PRIMARY KEY (id))";
@@ -174,10 +175,12 @@ public class Queries {
     if (checkLink(link) != -1) {
       return false;
     }
-    String sql = "INSERT INTO  website(url, title) "
-            + "VALUES ('" + link + "','" + title + "')";
     try {
-      stmt.executeUpdate(sql);
+      PreparedStatement newstmt = conn.prepareStatement("INSERT INTO  website(url, title) "
+              + "VALUES (?,?)");
+      newstmt.setString(1, link);
+      newstmt.setString(2, title);
+      newstmt.executeUpdate();
       return true;
     } catch (SQLException ex) {
       Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
@@ -334,6 +337,7 @@ public class Queries {
     }
     return false;
   }
+
   public static boolean removeAdmin(int id) throws ConnectionLostError {
     checkConnection();
     String sql = "UPDATE login \n"

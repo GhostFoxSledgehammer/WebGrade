@@ -25,6 +25,8 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -48,6 +50,8 @@ public class AdminFront extends JPanel implements CrawlerListener {
   private JLabel lblGiveTheUrl;
   private JButton btnGo;
   private DefaultTableModel model;
+  private final JComboBox<String> cb;
+  private JLabel depthLabel;
 
   /**
    * Create the frame.
@@ -65,29 +69,37 @@ public class AdminFront extends JPanel implements CrawlerListener {
     createButtons();
     createTable();
 
+    String[] choices = {"1", "2", "3"};
+
+    cb = new JComboBox<String>(choices);
     scrollPane = new JScrollPane(table);
 
-    gbc.gridx = 1;
+    gbc.gridx = 0;
     gbc.gridy = 0;
-    gbc.gridwidth = 1;
-    gbc.weightx = 1;
-    gbc.weighty = 1;
+    gbc.gridwidth = 4;
     gbc.insets = new Insets(5, 5, 5, 5);
-
+    gbc.weightx = 1;
+    gbc.weighty =1;
     add(spiderLabel, gbc);
 
     gbc.gridy++;
     add(lblGiveTheUrl, gbc);
 
+    gbc.gridwidth = 1;
     gbc.gridy++;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     add(urlField, gbc);
-
-    gbc.gridx = 2;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridx++;
+    add(depthLabel, gbc);
+    gbc.gridx++;
+    add(cb, gbc);
+    gbc.gridx++;
     add(btnGo, gbc);
 
     gbc.gridy++;
     gbc.gridx = 0;
-    gbc.gridwidth = 3;
+    gbc.gridwidth = 4;
     gbc.fill = GridBagConstraints.BOTH;
     add(scrollPane, gbc);
     gbc.fill = GridBagConstraints.NONE;
@@ -95,15 +107,13 @@ public class AdminFront extends JPanel implements CrawlerListener {
     gbc.gridx = 0;
     gbc.gridy++;
     gbc.gridwidth = 1;
-    gbc.anchor = GridBagConstraints.CENTER;
     add(btnViewFeedbacks, gbc);
-
     gbc.gridx = 2;
     add(btnManageUsers, gbc);
 
-    gbc.gridx = 1;
+    gbc.gridx = 0;
     gbc.gridy++;
-    gbc.gridwidth = 1;
+    gbc.gridwidth = 4;
     add(btnLogOut, gbc);
     JOptionPane.showMessageDialog(this, "Welcome Admin!\nHave a great time!");
   }
@@ -122,6 +132,8 @@ public class AdminFront extends JPanel implements CrawlerListener {
 
     spiderLabel = new JLabel("");
     spiderLabel.setIcon(ImageUtil.scaleImageIcon(getIcon("spider.jpg"), 200));
+
+    depthLabel = new JLabel("Depth to Crawl");
   }
 
   private void createFields() {
@@ -137,7 +149,8 @@ public class AdminFront extends JPanel implements CrawlerListener {
           JOptionPane.showMessageDialog(null, "Seems like you have not entered a URL :)");
         } else {
           clearTable();
-          Crawler.getInstance().startCrawling(link, 0);
+          int selectedIndex = cb.getSelectedIndex();
+          Crawler.getInstance().startCrawling(link, selectedIndex+1);
         }
       }
     });
@@ -209,5 +222,9 @@ public class AdminFront extends JPanel implements CrawlerListener {
         }
       }
     });
+  }
+
+  public static void main(String[] args) {
+    maingui.getInstance().replacePanel(getInstance());
   }
 }

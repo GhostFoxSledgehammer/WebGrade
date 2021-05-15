@@ -9,6 +9,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,7 +23,7 @@ http://www.mkyong.com/
  */
 public class Crawler {
 
-  private static final int MAX_DEPTH = 2;
+  private static int MAX_DEPTH = 2;
   private static Crawler instance;
   private LinkedHashMap<String, String> links;
   private ArrayList<CrawlerListener> listeners = new ArrayList();
@@ -43,10 +45,16 @@ public class Crawler {
     if (Thread.currentThread().isInterrupted()) {
       return;
     }
-    if ((!links.containsKey(URL) && (depth < MAX_DEPTH))) {
+    if ((!links.containsKey(URL) && (depth <= MAX_DEPTH))) {
       try {
+        System.out.println(depth);
         Document document = Jsoup.connect(URL).get();
         String title = document.title();
+        try {
+          title = java.net.URLDecoder.decode(title, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+          // not going to happen - value came from JDK's own StandardCharsets
+        }
         addLink(URL, title);
         Elements linksOnPage = document.select("a[href]");
         depth++;
@@ -61,10 +69,11 @@ public class Crawler {
 
   public void startCrawling(String URL, int depth) {
     stop();
+    MAX_DEPTH = depth;
     thread = new Thread(new Runnable() {
       @Override
       public void run() {
-        getPageLinks(URL, depth);
+        getPageLinks(URL, 0);
       }
     });
     thread.start();

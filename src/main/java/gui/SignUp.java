@@ -22,7 +22,7 @@ import sqlhelper.Queries;
 import static utils.IOUtils.getIcon;
 import utils.ImageUtil;
 import utils.PasswordAuthentication;
-import static sqlhelper.Queries.loginUser;
+import static sqlhelper.Queries.checkUser;
 
 public class SignUp extends JPanel {
 
@@ -130,7 +130,7 @@ public class SignUp extends JPanel {
           if (!passwordField.getText().equals(repasswordField.getText())) {
             JOptionPane.showMessageDialog(null, "Passwords don't match");
           } else try {
-            if (loginUser(username, password) > 0) {
+            if (checkUser(username) > 0) {
               JOptionPane.showMessageDialog(null, "Username Already registered, try Loggin in or use another username");
             } else {
               boolean success = Queries.createUser(username, password);
