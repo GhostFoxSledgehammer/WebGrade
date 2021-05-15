@@ -78,7 +78,7 @@ public class Queries {
       stmt.executeUpdate(websitetab);
       stmt.executeUpdate(feedback_tab);
       if (checkUser("admin") == -1) {
-        Queries.createUser("admin", "admin", true);
+        Queries.createUser("admin", "admin", 2);
       }
       return true;
     } catch (SQLException ex) {
@@ -89,7 +89,7 @@ public class Queries {
 
   public static int loginUser(String username, String password) throws ConnectionLostError {
     checkConnection();
-    String sql = "Select id,password from login WHERE username = '"
+    String sql = "Select id,password,isadmin from login WHERE username = '"
             + username + "'";
     try {
       ResultSet rs = stmt.executeQuery(sql);
@@ -97,6 +97,7 @@ public class Queries {
         int id = rs.getInt(1);
         String token = rs.getString(2);
         if (settings.passwordAuth.authenticate(password.toCharArray(), token)) {
+          settings.logIn(id, rs.getInt(3));
           return id;
         }
       }
@@ -122,10 +123,15 @@ public class Queries {
   }
 
   public static boolean createUser(String username, String password) throws ConnectionLostError {
+    return createUser(username, password, 0);
+  }
+
+  public static boolean createUser(String username, String password, int adminType) throws ConnectionLostError {
     checkConnection();
     password = settings.passwordAuth.hash(password.toCharArray());
     String sql = "INSERT INTO login(username, password, isadmin) "
-            + "VALUES ('" + username + "','" + password + "',0)";
+            + "VALUES ('" + username + "','" + password + "'," + adminType
+            + ")";
     try {
       stmt.executeUpdate(sql);
       return true;
@@ -133,19 +139,6 @@ public class Queries {
       Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
     }
     return false;
-  }
-
-  public static void createUser(String username, String password, boolean isadmin) throws ConnectionLostError {
-    checkConnection();
-    password = settings.passwordAuth.hash(password.toCharArray());
-    String sql = "INSERT INTO login(username, password, isadmin) "
-            + "VALUES ('" + username + "','" + password + "'," + (isadmin ? "1" : "0")
-            + ")";
-    try {
-      stmt.executeUpdate(sql);
-    } catch (SQLException ex) {
-      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
-    }
   }
 
   public static int checkLink(String link) throws ConnectionLostError {
@@ -162,18 +155,18 @@ public class Queries {
     return -1;
   }
 
-  public static boolean isAdmin(int id) throws ConnectionLostError {
+  public static int isAdmin(int id) throws ConnectionLostError {
     checkConnection();
     String sql = "SELECT isadmin from login WHERE id = " + id;
     try {
       ResultSet rs = stmt.executeQuery(sql);
       if (rs.next()) {
-        return rs.getInt(1) != 0;
+        return rs.getInt(1);
       }
     } catch (SQLException ex) {
       Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
     }
-    return false;
+    return 0;
   }
 
   public static boolean insertLink(String title, String link) throws ConnectionLostError {
@@ -299,6 +292,62 @@ public class Queries {
     return false;
   }
 
+  public static ArrayList<user> getUsers() throws ConnectionLostError {
+    checkConnection();
+    String sql = "SELECT id,username,isadmin FROM login";
+    try {
+      ResultSet rs = stmt.executeQuery(sql);
+      ArrayList<user> users = new ArrayList();
+      while (rs.next()) {
+        users.add(new user(rs.getInt(1), rs.getString(2), rs.getInt(3)));
+      }
+      return users;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return null;
+  }
+
+  public static boolean deleteUser(int id) throws ConnectionLostError {
+    checkConnection();
+    String sql = "DELETE from login \n"
+            + "WHERE id  = " + id;
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+
+  public static boolean makeAdmin(int id) throws ConnectionLostError {
+    checkConnection();
+    String sql = "UPDATE login \n"
+            + "SET isadmin = 1\n"
+            + "WHERE id  = " + id;
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+  public static boolean removeAdmin(int id) throws ConnectionLostError {
+    checkConnection();
+    String sql = "UPDATE login \n"
+            + "SET isadmin = 0\n"
+            + "WHERE id  = " + id;
+    try {
+      stmt.executeUpdate(sql);
+      return true;
+    } catch (SQLException ex) {
+      Logger.getLogger(Queries.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return false;
+  }
+
   public static class link {
 
     public String url, title;
@@ -329,6 +378,23 @@ public class Queries {
     @Override
     public String toString() {
       return feedback;
+    }
+  }
+
+  public static class user {
+
+    public String username;
+    public int type, id;
+
+    public user(int id, String username, int type) {
+      this.id = id;
+      this.username = username;
+      this.type = type;
+    }
+
+    @Override
+    public String toString() {
+      return username;
     }
   }
 }

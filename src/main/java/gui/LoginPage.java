@@ -105,14 +105,11 @@ public class LoginPage extends JPanel {
           }
           int id = Queries.loginUser(usernameField.getText(), passwordField.getText());
           if (id > 0) {
-            settings.userId = id;
-            //TODO
-            if (Queries.isAdmin(id)) {
+            if (Queries.isAdmin(id) >0) {
               maingui.getInstance().replacePanel(AdminFront.getInstance());
             } else {
               maingui.getInstance().replacePanel(UserFront.getInstance());
             }
-            //TODO
           } else {
             JOptionPane.showMessageDialog(null, "Unsuccessful login! \n Please try again");
           }

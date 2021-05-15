@@ -4,7 +4,6 @@
 package gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,15 +37,14 @@ public class maingui extends JFrame {
       SwingUtilities.invokeLater(() -> replacePanel(newpanel));
       return;
     }
-    getInstance().getContentPane().removeAll();
-    getInstance().getContentPane().add(newpanel);
-    getInstance().setMinimumSize(new Dimension(100,100));
-    getInstance().setSize(1500, 1500);
-    getInstance().pack();
+    getContentPane().removeAll();
+    getContentPane().add(newpanel);
+    setMinimumSize(null);
+    pack();
 //    double scaling = getScaling();
 //    Dimension size = MathUtils.scaleDimension(getInstance().getSize(), scaling);
     getInstance().setMinimumSize(getInstance().getSize());
-    getInstance().setLocationRelativeTo(null);
+    setLocationRelativeTo(null);
   }
 
   public static void main(String[] args) {

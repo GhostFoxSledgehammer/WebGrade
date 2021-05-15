@@ -48,17 +48,17 @@ public class ViewFeedback extends JPanel {
   /**
    * Launch the application.
    */
-//  public static void main(String[] args) {
-//    EventQueue.invokeLater(new Runnable() {
-//      public void run() {
-//        try {
-//          maingui.getInstance().replacePanel(ViewFeedback.getInstance());
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    });
-//  }
+  public static void main(String[] args) {
+    EventQueue.invokeLater(new Runnable() {
+      public void run() {
+        try {
+          maingui.getInstance().replacePanel(ViewFeedback.getInstance());
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
   private DefaultTableModel model;
   private JButton btnDelete;
 
@@ -130,7 +130,7 @@ public class ViewFeedback extends JPanel {
       public void actionPerformed(ActionEvent e) {
         clearTable();
         new Thread(() -> {
-          ViewFeedback.getFeedback();
+          getFeedback();
         }).start();
       }
     });
@@ -154,7 +154,7 @@ public class ViewFeedback extends JPanel {
     btnDelete.setEnabled(false);
     btnDelete.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        deleteFeedbacks();
+        deleteFeedback();
       }
     });
   }
@@ -202,16 +202,6 @@ public class ViewFeedback extends JPanel {
         return this;
       }
     });
-    table.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-          int row = table.getSelectedRow();
-          int col = model.findColumn("Feedback");
-          Object link = model.getValueAt(row, col);
-
-        }
-      }
-    });
   }
 
   private void clearTable() {
@@ -222,7 +212,7 @@ public class ViewFeedback extends JPanel {
     }
   }
 
-  private static void getFeedback() {
+  private  void getFeedback() {
     try {
       ArrayList<feedback> feedbacks = Queries.getFeedbacks();
       updateFeedbacks(feedbacks);
@@ -231,7 +221,7 @@ public class ViewFeedback extends JPanel {
     }
   }
 
-  private static void updateFeedbacks(ArrayList<Queries.feedback> feedbacks) {
+  private void updateFeedbacks(ArrayList<Queries.feedback> feedbacks) {
     if (!SwingUtilities.isEventDispatchThread()) {
       SwingUtilities.invokeLater(() -> updateFeedbacks(feedbacks));
       return;
@@ -240,9 +230,9 @@ public class ViewFeedback extends JPanel {
     int i = 1;
     while (it.hasNext()) {
       feedback afeed = it.next();
-      getInstance().model.addRow(new Object[]{i, afeed});
+      model.addRow(new Object[]{i, afeed});
     }
-    getInstance().model.fireTableDataChanged();
+    model.fireTableDataChanged();
   }
 
   private void readFeedbacks() {
@@ -266,10 +256,9 @@ public class ViewFeedback extends JPanel {
 
   }
 
-  private void deleteFeedbacks() {
+  private void deleteFeedback() {
     int row = table.getSelectedRow();
     feedback feed = (feedback) model.getValueAt(row, feedcol);
-    JTextArea jta = new JTextArea(feed.feedback);
     String[] options = {"Yes", "No"};
     int x = JOptionPane.showOptionDialog(maingui.getInstance(), "This is permanent, are you sure?",
             "Delete Feedback", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
@@ -284,6 +273,5 @@ public class ViewFeedback extends JPanel {
         maingui.getInstance().ConnectionLost();
       }
     }
-
   }
 }

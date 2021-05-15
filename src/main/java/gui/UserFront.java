@@ -91,7 +91,7 @@ public class UserFront extends JPanel {
     gbc.gridx++;
     add(btnGo, gbc);
     gbc.gridx++;
-    add(btnRead, gbc);
+//    add(btnRead, gbc); TODO
 
     gbc.gridx = 0;
     gbc.gridy++;
@@ -105,9 +105,10 @@ public class UserFront extends JPanel {
 
     gbc.gridy++;
     add(lblClickOnThe, gbc);
+
     gbc.gridy++;
     gbc.gridx = 0;
-    gbc.gridwidth = 2;
+    gbc.gridwidth = 1;
     add(btnFeedback, gbc);
     gbc.gridx++;
     add(btnLogOut, gbc);
@@ -159,7 +160,7 @@ public class UserFront extends JPanel {
     btnLogOut = new JButton("Log out");
     btnLogOut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-        settings.userId = -1;
+        settings.logOut();
         maingui.getInstance().replacePanel(new LoginPage());
       }
     });

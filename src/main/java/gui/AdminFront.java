@@ -42,7 +42,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
   private JScrollPane scrollPane;
   private JLabel spiderLabel;
   private JButton btnViewFeedbacks;
-  private JButton btnManageAdmins;
+  private JButton btnManageUsers;
   private JButton btnLogOut;
 
   private JLabel lblGiveTheUrl;
@@ -99,7 +99,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
     add(btnViewFeedbacks, gbc);
 
     gbc.gridx = 2;
-    add(btnManageAdmins, gbc);
+    add(btnManageUsers, gbc);
 
     gbc.gridx = 1;
     gbc.gridy++;
@@ -148,17 +148,18 @@ public class AdminFront extends JPanel implements CrawlerListener {
       }
     });
 
-    btnManageAdmins = new JButton("Manage Admins");
-    btnManageAdmins.addActionListener(new ActionListener() {
+    btnManageUsers = new JButton("Manage Users");
+    btnManageUsers.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-
+        maingui.getInstance().replacePanel(ManageUsers.getInstance());
       }
     });
 
     btnLogOut = new JButton("Log out");
     btnLogOut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-        settings.userId = -1;
+        settings.logOut();
+        Crawler.getInstance().stop();
         maingui.getInstance().replacePanel(new LoginPage());
       }
     });
