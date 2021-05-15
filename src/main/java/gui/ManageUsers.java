@@ -41,9 +41,6 @@ public class ManageUsers extends JPanel {
 
   private static ManageUsers instance;
 
-  private static void getUsers() {
-  }
-
   private JButton btnShow;
   private JButton btnDelete;
   private JButton btnMakeAdmin;
@@ -200,6 +197,13 @@ public class ManageUsers extends JPanel {
   }
 
   private void clearTable() {
+    int rowCount = model.getRowCount();
+    for (int i = rowCount - 1; i >= 0; i--) {
+      model.removeRow(i);
+    }
+  }
+
+  private void getUsers() {
     try {
       ArrayList<user> users = Queries.getUsers();
       updateUsers(users);

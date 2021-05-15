@@ -156,17 +156,17 @@ public class ViewFeedback extends JPanel {
     table.getColumnModel().getColumn(0).setMinWidth(50);
     table.getColumnModel().getColumn(0).setMaxWidth(70);
     table.getTableHeader().setReorderingAllowed(false);
-    table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-        @Override
-        public void valueChanged(ListSelectionEvent event) {
-          if(table.getSelectionModel().isSelectionEmpty()) {
-            btnRead.setEnabled(false);
-            btnDelete.setEnabled(false);
-          } else {
-            btnRead.setEnabled(true);
-            btnDelete.setEnabled(true);
-          }
+    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+      @Override
+      public void valueChanged(ListSelectionEvent event) {
+        if (table.getSelectionModel().isSelectionEmpty()) {
+          btnRead.setEnabled(false);
+          btnDelete.setEnabled(false);
+        } else {
+          btnRead.setEnabled(true);
+          btnDelete.setEnabled(true);
         }
+      }
     });
     table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
       @Override
@@ -189,14 +189,13 @@ public class ViewFeedback extends JPanel {
   }
 
   private void clearTable() {
-
     int rowCount = model.getRowCount();
     for (int i = rowCount - 1; i >= 0; i--) {
       model.removeRow(i);
     }
   }
 
-  private  void getFeedback() {
+  private void getFeedback() {
     try {
       ArrayList<feedback> feedbacks = Queries.getFeedbacks();
       updateFeedbacks(feedbacks);
@@ -231,7 +230,7 @@ public class ViewFeedback extends JPanel {
         boolean marked = Queries.markAsRead(feed);
         if (marked) {
           feed.seen = true;
-          model.fireTableRowsUpdated(row, row+1);
+          model.fireTableRowsUpdated(row, row + 1);
         }
       } catch (ConnectionLostError ex) {
         maingui.getInstance().ConnectionLost();
@@ -251,7 +250,7 @@ public class ViewFeedback extends JPanel {
         boolean deleted = Queries.deleteFeedback(feed);
         if (deleted) {
           model.removeRow(row);
-          model.fireTableRowsDeleted(row, row +1);
+          model.fireTableRowsDeleted(row, row + 1);
         }
       } catch (ConnectionLostError ex) {
         maingui.getInstance().ConnectionLost();
