@@ -15,8 +15,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.BorderFactory;
@@ -45,20 +43,6 @@ public class ViewFeedback extends JPanel {
   private JButton btnViewFeedbacks, btnBack, btnRead, btnMarkRead;
   private final JScrollPane scrollPane;
 
-  /**
-   * Launch the application.
-   */
-  public static void main(String[] args) {
-    EventQueue.invokeLater(new Runnable() {
-      public void run() {
-        try {
-          maingui.getInstance().replacePanel(ViewFeedback.getInstance());
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    });
-  }
   private DefaultTableModel model;
   private JButton btnDelete;
 

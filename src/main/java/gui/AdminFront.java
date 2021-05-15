@@ -25,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -79,7 +78,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
     gbc.gridwidth = 4;
     gbc.insets = new Insets(5, 5, 5, 5);
     gbc.weightx = 1;
-    gbc.weighty =1;
+    gbc.weighty = 1;
     add(spiderLabel, gbc);
 
     gbc.gridy++;
@@ -150,7 +149,7 @@ public class AdminFront extends JPanel implements CrawlerListener {
         } else {
           clearTable();
           int selectedIndex = cb.getSelectedIndex();
-          Crawler.getInstance().startCrawling(link, selectedIndex+1);
+          Crawler.getInstance().startCrawling(link, selectedIndex + 1);
         }
       }
     });
@@ -222,9 +221,5 @@ public class AdminFront extends JPanel implements CrawlerListener {
         }
       }
     });
-  }
-
-  public static void main(String[] args) {
-    maingui.getInstance().replacePanel(getInstance());
   }
 }

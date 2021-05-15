@@ -273,8 +273,4 @@ public class ManageUsers extends JPanel {
       maingui.getInstance().ConnectionLost();
     }
   }
-
-  public static void main(String[] args) {
-    maingui.getInstance().replacePanel(getInstance());
-  }
 }

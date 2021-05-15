@@ -4,6 +4,8 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.geom.AffineTransform;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -16,6 +18,7 @@ import javax.swing.SwingUtilities;
 public class maingui extends JFrame {
 
   private static maingui instance;
+  private boolean workaround;
 
   private maingui() {
     setTitle("Website Ranking System");
@@ -23,6 +26,14 @@ public class maingui extends JFrame {
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLayout(new BorderLayout());
+  }
+
+  @Override
+  public void setSize(int width, int height) {
+    if (workaround) {
+      return;
+    }
+    super.setSize(width, height);
   }
 
   public static maingui getInstance() {
@@ -41,10 +52,15 @@ public class maingui extends JFrame {
     getContentPane().add(newpanel);
     setMinimumSize(null);
     pack();
+    Dimension dorig=getSize();
+    AffineTransform at = getGraphicsConfiguration().getDefaultTransform();
+    Dimension dmin = new Dimension((int) (dorig.width * at.getScaleX()) +1, (int) (dorig.height * at.getScaleY()) +1);
 //    double scaling = getScaling();
 //    Dimension size = MathUtils.scaleDimension(getInstance().getSize(), scaling);
-    getInstance().setMinimumSize(getInstance().getSize());
     setLocationRelativeTo(null);
+    workaround = true;
+    setMinimumSize(dmin);
+    workaround = false;
   }
 
   public static void main(String[] args) {
