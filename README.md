@@ -8,10 +8,10 @@ Our Project,WebGrade, is a basic Website Ranking System, which Ranks URLs on the
 
 ## Steps to Run 
 
-Step 1 - Download the project folder from the zip folder.
-Step 2 - Open the project folder in netbeans IDE
-Step 3 - Run the project, and after this  type your username and password for SQL workbench.
-Step 4 - You  have reached the home page.Use username - admin and password - admin to login as an Admin, otherwise Create User.
+Step 1 - Clone this repository.<br>
+Step 2 - Open the project folder in your preferred IDE.<br>
+Step 3 - Run the project, and after this  type your username and password for SQL workbench.<br>
+Step 4 - You  have reached the home page.Use username - admin and password - admin to login as an Admin, otherwise Create User.<br>
 
 
 
